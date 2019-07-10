@@ -1,0 +1,59 @@
+clear;close all; clc;
+
+data = load('binMNIST.mat')
+
+
+Xtrain = data(1).bindata_trn;
+Ytrain = data(1).digtargets_trn;
+
+Xtest = data(1).bindata_tst;
+Ytest = data(1).digtargets_tst;
+%% RBM training klar kod via matlab
+inputdata = Xtrain;
+outputdata = Ytrain;
+
+[n, h] = size(Xtrain);
+ 
+rbm = randRBM(h , 50);
+rbm = pretrainRBM( rbm, inputdata );
+
+
+    showStuff = [12 3 9 16 7 4 1 5 32 10];
+    % Gibbs sampling step 0
+    vis0 = double(Xtrain(showStuff,:)); % Set values of visible nodes
+    
+    hid0 = v2h( rbm, vis0 );  % Compute hidden nodes
+    
+    % Gibbs sampling step 1
+    bhid0 = double( rand(size(hid0)) < hid0 );
+   
+    vis1 = h2v( rbm, bhid0 );  % Compute visible nodes
+    
+    %% Plot pictures of trained 
+
+    for i = 1:10
+        subplot(2,5,i)
+        imshow(reshape(vis1(i,:),28,28)')
+    
+    end
+
+    
+    %% Plot rmse 
+    rmse = rbm.rmse;
+    
+    plot(1:100,rmse)
+    title('Reconstruction RMS error')
+    xlabel('Epochs')
+    ylabel('rmse')
+    
+%% plot för vikter W 
+%W = TrainedStruct(1).W
+W = rbm(1).W
+
+for i= 1:10
+    subplot(5,10,i)
+    imshow(reshape(W(:,i),28,28)')
+end
+
+
+
